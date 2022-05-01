@@ -1,15 +1,19 @@
 import admin from 'firebase-admin';
-import { getMessaging } from 'firebase-admin/messaging';
+import { getMessaging, Messaging } from 'firebase-admin/messaging';
 import { Message } from '../interfaces';
 
 class FirebaseAdmin {
 
   private app: admin.app.App;
-  private messaging;
+  private messaging: Messaging;
 
   constructor() {
     this.app = admin.initializeApp({
-      credential: admin.credential.cert(require('../../firebase-admin.json'))
+      credential: admin.credential.cert({
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY,
+      })
     });
 
     this.messaging = getMessaging(this.app);
