@@ -13,10 +13,11 @@ const supabase_js_1 = require("@supabase/supabase-js");
 class Supabase {
     constructor() {
         const supabaseUrl = process.env.SUPABASE_URL || 'https://xyzcompany.supabase.co';
-        const supabaseKey = process.env.SUPABASE_KEY || 'public-anon-key';
+        const supabaseKey = process.env.SUPABASE_SERVICE_KEY || 'service-key';
         this.client = (0, supabase_js_1.createClient)(supabaseUrl, supabaseKey);
         console.log(`🦸 [Supabase] Initialized Supabase client`);
     }
+    // User Token
     getToken(id) {
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
             const { data, error, status } = yield this.client
@@ -32,6 +33,7 @@ class Supabase {
             }
         }));
     }
+    // User Profile
     getProfile(id, fields) {
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
             const select = fields && fields.length ? fields.join(', ') : '*';
@@ -63,6 +65,35 @@ class Supabase {
                 resolve(data);
             }
         }));
+    }
+    // Ring
+    ring(targetUser, sourceUser) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const targetUserProfile = yield this.getProfile(targetUser, ['id', 'ringers']);
+            const ringers = (targetUserProfile === null || targetUserProfile === void 0 ? void 0 : targetUserProfile.ringers) || [];
+            if (ringers.includes(sourceUser)) {
+                return;
+            }
+            ringers.push(sourceUser);
+            this.updateProfile({
+                id: targetUserProfile.id,
+                ringers,
+            });
+        });
+    }
+    unring(targetUser, sourceUser) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const targetUserProfile = yield this.getProfile(targetUser, ['id', 'ringers']);
+            const ringers = (targetUserProfile === null || targetUserProfile === void 0 ? void 0 : targetUserProfile.ringers) || [];
+            if (!ringers.includes(sourceUser)) {
+                return;
+            }
+            ringers.splice(ringers.indexOf(sourceUser), 1);
+            this.updateProfile({
+                id: targetUserProfile.id,
+                ringers,
+            });
+        });
     }
 }
 exports.default = new Supabase();

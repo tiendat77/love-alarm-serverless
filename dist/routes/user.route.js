@@ -26,14 +26,20 @@ router.post('/ring', middlewares_1.authenticate, (req, res) => __awaiter(void 0,
         });
     }
     const sourceUser = (0, utils_1.getUserFromRequest)(req);
+    if (!sourceUser || !(sourceUser === null || sourceUser === void 0 ? void 0 : sourceUser.id)) {
+        return res.status(400).json({
+            message: 'Token is invalid',
+        });
+    }
     try {
+        supabase_1.default.ring(targetUser.id, sourceUser.id);
         const token = yield supabase_1.default.getToken(targetUser.id);
         if (!token || !(token === null || token === void 0 ? void 0 : token.notification)) {
             return res.status(400).json({
                 message: 'No token found for target profile.',
             });
         }
-        const message = {
+        firebase_admin_1.default.sendMessageTo(token.notification, {
             title: `💓 ${(sourceUser === null || sourceUser === void 0 ? void 0 : sourceUser.name) || 'Someone'} is ringing you!`,
             body: `🎊 Click to view their profile 🎉 `,
             data: {
@@ -42,16 +48,41 @@ router.post('/ring', middlewares_1.authenticate, (req, res) => __awaiter(void 0,
                 profileName: sourceUser === null || sourceUser === void 0 ? void 0 : sourceUser.name,
                 url: `com.dathuynh.lovealarm://profile/${sourceUser === null || sourceUser === void 0 ? void 0 : sourceUser.id}`,
             },
-        };
-        firebase_admin_1.default.sendMessageTo(token.notification, message);
-        return res.status(200).json({
+        });
+        res.status(200).json({
             message: 'Successfully ring him/her alarm.',
         });
     }
     catch (error) {
         console.error(error);
-        return res.status(500).json({
+        res.status(500).json({
             message: 'Failed to ring him/her alarm.',
+        });
+    }
+}));
+router.post('/unring', middlewares_1.authenticate, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const targetUser = req.body;
+    if (!(targetUser === null || targetUser === void 0 ? void 0 : targetUser.id)) {
+        return res.status(400).json({
+            message: 'Missing profile id',
+        });
+    }
+    const sourceUser = (0, utils_1.getUserFromRequest)(req);
+    if (!sourceUser || !(sourceUser === null || sourceUser === void 0 ? void 0 : sourceUser.id)) {
+        return res.status(400).json({
+            message: 'Token is invalid',
+        });
+    }
+    try {
+        supabase_1.default.unring(targetUser.id, sourceUser.id);
+        res.status(200).json({
+            message: 'Successfully un-ring him/her alarm.',
+        });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: 'Failed to un-ring him/her alarm.',
         });
     }
 }));

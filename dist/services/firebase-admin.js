@@ -8,7 +8,11 @@ const messaging_1 = require("firebase-admin/messaging");
 class FirebaseAdmin {
     constructor() {
         this.app = firebase_admin_1.default.initializeApp({
-            credential: firebase_admin_1.default.credential.cert(require('../../firebase-admin.json'))
+            credential: firebase_admin_1.default.credential.cert({
+                projectId: process.env.FIREBASE_PROJECT_ID,
+                clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+                privateKey: process.env.FIREBASE_PRIVATE_KEY,
+            })
         });
         this.messaging = (0, messaging_1.getMessaging)(this.app);
         console.log('🔥 [FirebaseAdmin] Initialized Firebase Admin');
