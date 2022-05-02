@@ -30,8 +30,8 @@ router.post('/ring', authenticate, async (req: Request, res: Response) => {
 
     const token = await Supabase.getToken(targetUser.id);
     if (!token || !token?.notification) {
-      return res.status(400).json({
-        message: 'No token found for target profile.',
+      return res.status(200).json({
+        message: 'Successfully ring him/her alarm. But can not send notification',
       });
     }
 
