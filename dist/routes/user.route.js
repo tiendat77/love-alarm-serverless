@@ -35,8 +35,8 @@ router.post('/ring', middlewares_1.authenticate, (req, res) => __awaiter(void 0,
         supabase_1.default.ring(targetUser.id, sourceUser.id);
         const token = yield supabase_1.default.getToken(targetUser.id);
         if (!token || !(token === null || token === void 0 ? void 0 : token.notification)) {
-            return res.status(400).json({
-                message: 'No token found for target profile.',
+            return res.status(200).json({
+                message: 'Successfully ring him/her alarm. But can not send notification',
             });
         }
         firebase_admin_1.default.sendMessageTo(token.notification, {

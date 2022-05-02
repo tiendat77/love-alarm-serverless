@@ -6,6 +6,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const router = express_1.default.Router();
 router.get('/', (req, res) => {
-    res.send('Love Alarm Serverless Functions | version: 0.0.1');
+    res.json({
+        description: 'Love Alarm Serverless Functions',
+        version: '0.0.1'
+    });
 });
 exports.default = router;
