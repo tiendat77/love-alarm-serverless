@@ -18,7 +18,7 @@ const supabase_1 = __importDefault(require("../services/supabase"));
 const firebase_admin_1 = __importDefault(require("../services/firebase-admin"));
 const utils_1 = require("../utils");
 const router = express_1.default.Router();
-router.post('/ring', middlewares_1.authenticate, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.post('/ring', middlewares_1.authenticate, (req, res) => {
     const targetUser = req.body;
     if (!(targetUser === null || targetUser === void 0 ? void 0 : targetUser.id)) {
         return res.status(400).json({
@@ -31,27 +31,34 @@ router.post('/ring', middlewares_1.authenticate, (req, res) => __awaiter(void 0,
             message: 'Token is invalid',
         });
     }
+    if (sourceUser.id === targetUser.id) {
+        return res.status(400).json({
+            message: 'Cannot ring yourself',
+        });
+    }
     try {
         supabase_1.default.ring(targetUser.id, sourceUser.id);
-        const token = yield supabase_1.default.getToken(targetUser.id);
-        if (!token || !(token === null || token === void 0 ? void 0 : token.notification)) {
-            return res.status(200).json({
-                message: 'Successfully ring him/her alarm. But can not send notification',
+        setTimeout(() => __awaiter(void 0, void 0, void 0, function* () {
+            const token = yield supabase_1.default.getToken(targetUser.id);
+            if (!token || !(token === null || token === void 0 ? void 0 : token.notification)) {
+                return res.status(200).json({
+                    message: 'Successfully ring him/her alarm. But can not send notification',
+                });
+            }
+            firebase_admin_1.default.sendMessageTo(token.notification, {
+                title: `💓 ${(sourceUser === null || sourceUser === void 0 ? void 0 : sourceUser.name) || 'Someone'} is ringing you!`,
+                body: `🎊 Click to view their profile 🎉 `,
+                data: {
+                    type: 'ring',
+                    profileId: sourceUser === null || sourceUser === void 0 ? void 0 : sourceUser.id,
+                    profileName: sourceUser === null || sourceUser === void 0 ? void 0 : sourceUser.name,
+                    url: `com.dathuynh.lovealarm://profile/${sourceUser === null || sourceUser === void 0 ? void 0 : sourceUser.id}`,
+                },
             });
-        }
-        firebase_admin_1.default.sendMessageTo(token.notification, {
-            title: `💓 ${(sourceUser === null || sourceUser === void 0 ? void 0 : sourceUser.name) || 'Someone'} is ringing you!`,
-            body: `🎊 Click to view their profile 🎉 `,
-            data: {
-                type: 'ring',
-                profileId: sourceUser === null || sourceUser === void 0 ? void 0 : sourceUser.id,
-                profileName: sourceUser === null || sourceUser === void 0 ? void 0 : sourceUser.name,
-                url: `com.dathuynh.lovealarm://profile/${sourceUser === null || sourceUser === void 0 ? void 0 : sourceUser.id}`,
-            },
-        });
-        res.status(200).json({
-            message: 'Successfully ring him/her alarm.',
-        });
+            res.status(200).json({
+                message: 'Successfully ring him/her alarm.',
+            });
+        }), 500);
     }
     catch (error) {
         console.error(error);
@@ -59,7 +66,7 @@ router.post('/ring', middlewares_1.authenticate, (req, res) => __awaiter(void 0,
             message: 'Failed to ring him/her alarm.',
         });
     }
-}));
+});
 router.post('/unring', middlewares_1.authenticate, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const targetUser = req.body;
     if (!(targetUser === null || targetUser === void 0 ? void 0 : targetUser.id)) {

@@ -9,7 +9,7 @@ import { getUserFromRequest } from '../utils';
 
 const router = express.Router();
 
-router.post('/ring', authenticate, async (req: Request, res: Response) => {
+router.post('/ring', authenticate, (req: Request, res: Response) => {
   const targetUser = req.body;
   if (!targetUser?.id) {
     return res.status(400).json({
@@ -25,30 +25,38 @@ router.post('/ring', authenticate, async (req: Request, res: Response) => {
     });
   }
 
+  if (sourceUser.id === targetUser.id) {
+    return res.status(400).json({
+      message: 'Cannot ring yourself',
+    });
+  }
+
   try {
     Supabase.ring(targetUser.id, sourceUser.id);
 
-    const token = await Supabase.getToken(targetUser.id);
-    if (!token || !token?.notification) {
-      return res.status(200).json({
-        message: 'Successfully ring him/her alarm. But can not send notification',
+    setTimeout(async () => {
+      const token = await Supabase.getToken(targetUser.id);
+      if (!token || !token?.notification) {
+        return res.status(200).json({
+          message: 'Successfully ring him/her alarm. But can not send notification',
+        });
+      }
+
+      FirebaseAdmin.sendMessageTo(token.notification, {
+        title: `💓 ${sourceUser?.name || 'Someone'} is ringing you!`,
+        body: `🎊 Click to view their profile 🎉 `,
+        data: {
+          type: 'ring',
+          profileId: sourceUser?.id,
+          profileName: sourceUser?.name,
+          url: `com.dathuynh.lovealarm://profile/${sourceUser?.id}`,
+        },
       });
-    }
 
-    FirebaseAdmin.sendMessageTo(token.notification, {
-      title: `💓 ${sourceUser?.name || 'Someone'} is ringing you!`,
-      body: `🎊 Click to view their profile 🎉 `,
-      data: {
-        type: 'ring',
-        profileId: sourceUser?.id,
-        profileName: sourceUser?.name,
-        url: `com.dathuynh.lovealarm://profile/${sourceUser?.id}`,
-      },
-    });
-
-    res.status(200).json({
-      message: 'Successfully ring him/her alarm.',
-    });
+      res.status(200).json({
+        message: 'Successfully ring him/her alarm.',
+      });
+    }, 500);
 
   } catch (error) {
     console.error(error);
