@@ -32,8 +32,6 @@ router.post('/ring', authenticate, (req: Request, res: Response) => {
   }
 
   try {
-    Supabase.ring(targetUser.id, sourceUser.id);
-
     setTimeout(async () => {
       const token = await Supabase.getToken(targetUser.id);
       if (!token || !token?.notification) {
@@ -56,45 +54,13 @@ router.post('/ring', authenticate, (req: Request, res: Response) => {
       res.status(200).json({
         message: 'Successfully ring him/her alarm.',
       });
-    }, 500);
+    });
 
   } catch (error) {
     console.error(error);
 
     res.status(500).json({
       message: 'Failed to ring him/her alarm.',
-    });
-  }
-});
-
-router.post('/unring', authenticate, async (req: Request, res: Response) => {
-  const targetUser = req.body;
-  if (!targetUser?.id) {
-    return res.status(400).json({
-      message: 'Missing profile id',
-    });
-  }
-
-  const sourceUser = getUserFromRequest(req);
-
-  if (!sourceUser || !sourceUser?.id) {
-    return res.status(400).json({
-      message: 'Token is invalid',
-    });
-  }
-
-  try {
-    Supabase.unring(targetUser.id, sourceUser.id);
-
-    res.status(200).json({
-      message: 'Successfully un-ring him/her alarm.',
-    });
-
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: 'Failed to un-ring him/her alarm.',
     });
   }
 });

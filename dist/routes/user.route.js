@@ -37,7 +37,6 @@ router.post('/ring', middlewares_1.authenticate, (req, res) => {
         });
     }
     try {
-        supabase_1.default.ring(targetUser.id, sourceUser.id);
         setTimeout(() => __awaiter(void 0, void 0, void 0, function* () {
             const token = yield supabase_1.default.getToken(targetUser.id);
             if (!token || !(token === null || token === void 0 ? void 0 : token.notification)) {
@@ -58,7 +57,7 @@ router.post('/ring', middlewares_1.authenticate, (req, res) => {
             res.status(200).json({
                 message: 'Successfully ring him/her alarm.',
             });
-        }), 500);
+        }));
     }
     catch (error) {
         console.error(error);
@@ -67,30 +66,4 @@ router.post('/ring', middlewares_1.authenticate, (req, res) => {
         });
     }
 });
-router.post('/unring', middlewares_1.authenticate, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const targetUser = req.body;
-    if (!(targetUser === null || targetUser === void 0 ? void 0 : targetUser.id)) {
-        return res.status(400).json({
-            message: 'Missing profile id',
-        });
-    }
-    const sourceUser = (0, utils_1.getUserFromRequest)(req);
-    if (!sourceUser || !(sourceUser === null || sourceUser === void 0 ? void 0 : sourceUser.id)) {
-        return res.status(400).json({
-            message: 'Token is invalid',
-        });
-    }
-    try {
-        supabase_1.default.unring(targetUser.id, sourceUser.id);
-        res.status(200).json({
-            message: 'Successfully un-ring him/her alarm.',
-        });
-    }
-    catch (error) {
-        console.error(error);
-        res.status(500).json({
-            message: 'Failed to un-ring him/her alarm.',
-        });
-    }
-}));
 exports.default = router;

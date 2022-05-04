@@ -66,34 +66,5 @@ class Supabase {
             }
         }));
     }
-    // Ring
-    ring(targetUser, sourceUser) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const targetUserProfile = yield this.getProfile(targetUser, ['id', 'ringers']);
-            const ringers = (targetUserProfile === null || targetUserProfile === void 0 ? void 0 : targetUserProfile.ringers) || [];
-            if (ringers.includes(sourceUser)) {
-                return;
-            }
-            ringers.push(sourceUser);
-            this.updateProfile({
-                id: targetUserProfile.id,
-                ringers,
-            });
-        });
-    }
-    unring(targetUser, sourceUser) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const targetUserProfile = yield this.getProfile(targetUser, ['id', 'ringers']);
-            const ringers = (targetUserProfile === null || targetUserProfile === void 0 ? void 0 : targetUserProfile.ringers) || [];
-            if (!ringers.includes(sourceUser)) {
-                return;
-            }
-            ringers.splice(ringers.indexOf(sourceUser), 1);
-            this.updateProfile({
-                id: targetUserProfile.id,
-                ringers,
-            });
-        });
-    }
 }
 exports.default = new Supabase();
