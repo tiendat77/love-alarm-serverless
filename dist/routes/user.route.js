@@ -66,4 +66,45 @@ router.post('/ring', middlewares_1.authenticate, (req, res) => {
         });
     }
 });
+router.post('/message', middlewares_1.authenticate, (req, res) => {
+    const params = req.body || {};
+    if (!(params === null || params === void 0 ? void 0 : params.id) || !params.message) {
+        return res.status(400).json({
+            message: 'Target Id and Message are required.',
+        });
+    }
+    const from = (0, utils_1.getUserFromRequest)(req);
+    if (!from || !(from === null || from === void 0 ? void 0 : from.id)) {
+        return res.status(400).json({
+            message: 'Token is invalid',
+        });
+    }
+    try {
+        setTimeout(() => __awaiter(void 0, void 0, void 0, function* () {
+            const token = yield supabase_1.default.getToken(params.id);
+            if (!token || !(token === null || token === void 0 ? void 0 : token.notification)) {
+                return res.status(500).json({
+                    message: 'Target user not found!',
+                });
+            }
+            firebase_admin_1.default.sendMessageTo(token.notification, {
+                title: (from === null || from === void 0 ? void 0 : from.name) || 'Love Alarm',
+                body: params.message,
+                data: {
+                    type: 'message',
+                    url: `com.dathuynh.lovealarm://profile/${from === null || from === void 0 ? void 0 : from.id}`,
+                },
+            });
+            res.status(200).json({
+                message: 'Message sent.',
+            });
+        }));
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: 'Failed to send message.',
+        });
+    }
+});
 exports.default = router;
