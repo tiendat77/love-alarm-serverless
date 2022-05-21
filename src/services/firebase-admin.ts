@@ -22,7 +22,7 @@ class FirebaseAdmin {
   }
 
   sendMessageTo(token: string, message: Message) {
-    this.messaging.sendToDevice(token, {
+    this.messaging.sendToDevice([token], {
       data: {...message.data},
       notification: {
         title: message.title,

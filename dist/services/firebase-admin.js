@@ -18,7 +18,7 @@ class FirebaseAdmin {
         console.log('🔥 [FirebaseAdmin] Initialized Firebase Admin');
     }
     sendMessageTo(token, message) {
-        this.messaging.sendToDevice(token, {
+        this.messaging.sendToDevice([token], {
             data: Object.assign({}, message.data),
             notification: {
                 title: message.title,
