@@ -65,7 +65,7 @@ router.post('/ring', authenticate, (req: Request, res: Response) => {
   }
 });
 
-router.post('/message', authenticate, (req: Request, res: Response) => {
+router.post('/message', authenticate, async(req: Request, res: Response) => {
   const params = req.body || {};
   if (!params?.id || !params.message) {
     return res.status(400).json({
@@ -82,8 +82,7 @@ router.post('/message', authenticate, (req: Request, res: Response) => {
   }
 
   try {
-    setTimeout(async () => {
-      const token = await Supabase.getToken(params.id);
+    const token = await Supabase.getToken(params.id);
       if (!token || !token?.notification) {
         return res.status(500).json({
           message: 'Target user not found!',
@@ -102,7 +101,6 @@ router.post('/message', authenticate, (req: Request, res: Response) => {
       res.status(200).json({
         message: 'Message sent.',
       });
-    });
 
   } catch (error) {
     console.error(error);
